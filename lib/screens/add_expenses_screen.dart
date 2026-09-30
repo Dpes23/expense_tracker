@@ -2,7 +2,8 @@ import 'package:expense_tracker/models/expense.dart';
 import 'package:flutter/material.dart';
 
 class AddExpensesScreen extends StatefulWidget {
-  const AddExpensesScreen({super.key});
+  final Expense? expense;
+  const AddExpensesScreen({super.key, this.expense});
 
   @override
   State<AddExpensesScreen> createState() => _AddExpensesScreenState();
@@ -11,7 +12,27 @@ class AddExpensesScreen extends StatefulWidget {
 class _AddExpensesScreenState extends State<AddExpensesScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
-  final categoryController = TextEditingController();
+  final TextEditingController categoryController = TextEditingController();
+
+  String? selectedCategory;
+
+  List<String> categories = [
+    "Food",
+    "Transport",
+    "Shopping",
+    "Entertainment",
+    "Bills",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.expense != null) {
+      titleController.text = widget.expense!.title;
+      amountController.text = widget.expense!.amount.toString();
+      categoryController.text = widget.expense!.category;
+    }
+  }
 
   @override
   void dispose() {
@@ -24,57 +45,113 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Expense")),
-      body: Column(
-        children: [
-          const Center(child: Text("Expenses Details")),
-
-          TextField(
-            controller: titleController,
-            decoration: const InputDecoration(labelText: "Title"),
+      appBar: AppBar(
+        title: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          width: 175,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: Colors.blue,
           ),
-          SizedBox(height: 20),
-
-          TextField(
-            controller: amountController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: "Amount"),
+          child: const Text(
+            "Expense Details",
+            style: TextStyle(color: Color.fromARGB(255, 7, 13, 15)),
           ),
-          SizedBox(height: 20),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(7.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(
+                  labelText: "Enter Title",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              SizedBox(height: 40),
+              TextField(
+                controller: amountController,
+                decoration: InputDecoration(
+                  labelText: "Enter Amount",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              SizedBox(height: 40),
 
-          TextField(
-            controller: categoryController,
-            decoration: const InputDecoration(labelText: "Category"),
+              DropdownButtonFormField<String>(
+                //controller: categoryController,
+                value: selectedCategory,
+                decoration: InputDecoration(
+                  labelText: "Enter Category",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                items: categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedCategory = value;
+                  });
+                },
+              ),
+              SizedBox(height: 40),
+
+              ElevatedButton(
+                onPressed: () {
+                  // Add expense logic here
+                  if (titleController.text.isEmpty) {
+                    print("Please enter a title");
+                    return;
+                  }
+
+                  if (amountController.text.isEmpty) {
+                    print("Please enter an amount");
+                    return;
+                  }
+
+                  if (selectedCategory == null) {
+                    print("Please enter a category");
+                    return;
+                  }
+
+                  Expense newExpense = Expense(
+                    titleController.text,
+                    double.parse(amountController.text),
+                    selectedCategory!,
+                  );
+
+                  Navigator.pop(context, newExpense);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                  textStyle: TextStyle(fontSize: 18),
+                  foregroundColor: Color.fromARGB(255, 7, 13, 15),
+                ),
+                child: Text(
+                  "Save",
+                  //style: TextStyle(color: Color.fromARGB(255, 7, 13, 15))
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 20),
-
-          ElevatedButton(
-            onPressed: () {
-              if (titleController.text.isEmpty) {
-                print("Please enter a title");
-                return;
-              }
-
-              if (amountController.text.isEmpty) {
-                print("Please enter a amount");
-                return;
-              }
-
-              if (categoryController.text.isEmpty) {
-                print("Please enter a category");
-                return;
-              }
-              Expense newExpense = Expense(
-                titleController.text,
-                double.parse(amountController.text),
-                categoryController.text,
-              );
-
-              Navigator.pop(context, newExpense);
-            },
-            child: const Text("Add Expense"),
-          ),
-        ],
+        ),
       ),
     );
   }
