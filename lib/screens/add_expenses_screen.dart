@@ -15,6 +15,11 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
   final TextEditingController categoryController = TextEditingController();
 
   String? selectedCategory;
+  String? amountError;
+  String? titleError;
+  String? categoryError;
+
+  bool hasError = false;
 
   List<String> categories = [
     "Food",
@@ -47,8 +52,8 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          width: 175,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          width: 190,
           height: 40,
           alignment: Alignment.center,
           decoration: BoxDecoration(
@@ -70,21 +75,33 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
             children: [
               TextField(
                 controller: titleController,
+                onChanged: (value) {
+                  setState(() {
+                    titleError = null;
+                  });
+                },
                 decoration: InputDecoration(
                   labelText: "Enter Title",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  errorText: titleError,
                 ),
               ),
               SizedBox(height: 40),
               TextField(
                 controller: amountController,
+                onChanged: (value) {
+                  setState(() {
+                    amountError = null;
+                  });
+                },
                 decoration: InputDecoration(
                   labelText: "Enter Amount",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  errorText: amountError,
                 ),
               ),
               SizedBox(height: 40),
@@ -97,6 +114,7 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  errorText: categoryError,
                 ),
                 items: categories.map((category) {
                   return DropdownMenuItem(
@@ -107,6 +125,7 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
                 onChanged: (value) {
                   setState(() {
                     selectedCategory = value;
+                    categoryError = null;
                   });
                 },
               ),
@@ -114,25 +133,41 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
 
               ElevatedButton(
                 onPressed: () {
-                  // Add expense logic here
+                  titleError = null;
+                  amountError = null;
+                  categoryError = null;
+
+                  bool hasError = false;
+
                   if (titleController.text.isEmpty) {
-                    print("Please enter a title");
-                    return;
+                    titleError = "Please enter a title";
+                    hasError = true;
                   }
 
+                  double? amount = double.tryParse(amountController.text);
+
                   if (amountController.text.isEmpty) {
-                    print("Please enter an amount");
-                    return;
+                    amountError = "Please enter an amount";
+                    hasError = true;
+                  } else if (amount == null) {
+                    amountError = "Please enter a valid amount";
+                    hasError = true;
                   }
 
                   if (selectedCategory == null) {
-                    print("Please enter a category");
+                    categoryError = "Please select a category";
+                    hasError = true;
+                  }
+
+                  setState(() {});
+
+                  if (hasError) {
                     return;
                   }
 
                   Expense newExpense = Expense(
                     titleController.text,
-                    double.parse(amountController.text),
+                    amount!,
                     selectedCategory!,
                   );
 
