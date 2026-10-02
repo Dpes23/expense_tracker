@@ -180,7 +180,7 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
                   foregroundColor: Color.fromARGB(255, 7, 13, 15),
                 ),
                 child: Text(
-                  "Save",
+                  widget.expense == null ? "Save" : "Update",
                   //style: TextStyle(color: Color.fromARGB(255, 7, 13, 15))
                 ),
               ),
